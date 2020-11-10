@@ -14,7 +14,7 @@ import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsStatusCodes
 import com.google.android.gms.location.SettingsClient
 import ir.behnoudsh.aroundme.GPS_REQUEST
-import ir.behnoudsh.aroundme.data.LocationLiveData
+import ir.behnoudsh.aroundme.data.model.LocationLiveData
 
 
 class GpsUtils(private val context: Context) {

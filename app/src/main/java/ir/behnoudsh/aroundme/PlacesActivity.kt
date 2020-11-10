@@ -11,7 +11,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import ir.behnoudsh.aroundme.utilities.GpsUtils
-import ir.behnoudsh.aroundme.viewmodels.PlacesViewModel
+import ir.behnoudsh.aroundme.ui.viewmodels.PlacesViewModel
 import kotlinx.android.synthetic.main.activity_places.*
 
 class PlacesActivity : AppCompatActivity() {
@@ -33,11 +33,18 @@ class PlacesActivity : AppCompatActivity() {
                 this@PlacesActivity.isGPSEnabled = isGPSEnable
             }
         })
+
+        placesViewModel.mPlacesData!!.observe(this, {
+
+
+        })
+
+
     }
 
     private fun startLocationUpdate() {
         placesViewModel.getLocationData().observe(this, Observer {
-            latlong.text = it.longitude.toString() + " " + it.latitude.toString()
+            latlong.text = getString(R.string.latLong, it.longitude, it.latitude)
         })
     }
 
