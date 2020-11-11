@@ -31,12 +31,14 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun locationChanged(location: LocationModel) {
+        // too in method bayad barresi beshe ke
 
         var offset: Int = 20
 
         getAllPlaces(LocationModel(51.4238302, 35.7233924), offset)
 
     }
+
 
     fun getAllPlaces(location: LocationModel, offset: Int) {
 
