@@ -3,10 +3,10 @@ package ir.behnoudsh.aroundme.ui.viewmodels
 import android.app.Application
 import android.location.Location
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import ir.behnoudsh.aroundme.data.model.LocationLiveData
+import ir.behnoudsh.aroundme.data.model.LocationModel
 import ir.behnoudsh.aroundme.data.model.Venues.ResponseVenues
 import ir.behnoudsh.aroundme.data.repository.PlacesRepository
 import kotlinx.coroutines.launch
@@ -22,42 +22,27 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
 
     val placesRepository: PlacesRepository = PlacesRepository()
     val allPlacesSuccessLiveData = placesRepository.allPlacesSuccessLiveData
+    val allPlacesFailureLiveData = placesRepository.allPlacesSuccessLiveData
 
 
     fun getLocationData(): LocationLiveData {
-        if (!firstLocationSet) {
-            firstLocation = locationData
-            firstLocationSet = true
-        }
-        currentLocation = locationData
-
-        if (distance(
-                firstLocation.value!!.latitude,
-                firstLocation.value!!.longitude,
-                currentLocation.value!!.latitude,
-                currentLocation.value!!.longitude
-            ) > 100
-        ) {
-
-            firstLocation = currentLocation
-            //db bayad pak beshe
-            //offset 0
-
-        }
-
-        getAllPlaces(firstLocation, offset)
 
         return locationData;
     }
 
-    fun getAllPlaces(location: LocationLiveData, offset: Int) {
+    fun locationChanged(location: LocationModel) {
 
-        //get data based on firstlocation
+        var offset: Int = 20
+
+        getAllPlaces(LocationModel(51.4238302, 35.7233924), offset)
+
+    }
+
+    fun getAllPlaces(location: LocationModel, offset: Int) {
+
         viewModelScope.launch {
             placesRepository.getPlaces(
-                location.value?.latitude.toString()
-                        + "," +
-                        location.value?.longitude.toString(),
+                location.latitude.toString() + "," + location.longitude.toString(),
                 offset
             )
         }

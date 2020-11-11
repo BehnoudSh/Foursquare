@@ -11,6 +11,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import ir.behnoudsh.aroundme.R
+import ir.behnoudsh.aroundme.data.model.LocationModel
 import ir.behnoudsh.aroundme.utilities.GpsUtils
 import ir.behnoudsh.aroundme.ui.viewmodels.PlacesViewModel
 import kotlinx.android.synthetic.main.activity_places.*
@@ -41,14 +42,20 @@ class PlacesActivity : AppCompatActivity() {
 
 
         })
+
+        placesViewModel.allPlacesFailureLiveData.observe(this, {
+
+
+        })
     }
 
     private fun startLocationUpdate() {
         placesViewModel.getLocationData().observe(this, Observer {
-            latlong.text = getString(R.string.latLong, it.longitude, it.latitude)
+//            latlong.text = getString(R.string.latLong, it.longitude, it.latitude)
+            placesViewModel.locationChanged(LocationModel(it.longitude, it.latitude));
+
         })
     }
-
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
