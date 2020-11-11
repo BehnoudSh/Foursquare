@@ -1,4 +1,4 @@
-package ir.behnoudsh.aroundme
+package ir.behnoudsh.aroundme.ui.views
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import ir.behnoudsh.aroundme.R
 import ir.behnoudsh.aroundme.utilities.GpsUtils
 import ir.behnoudsh.aroundme.ui.viewmodels.PlacesViewModel
 import kotlinx.android.synthetic.main.activity_places.*
@@ -27,19 +28,19 @@ class PlacesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_places)
         placesViewModel = ViewModelProviders.of(this).get(PlacesViewModel::class.java)
+        registerObservers()
         GpsUtils(this).turnGPSOn(object : GpsUtils.OnGpsListener {
-
             override fun gpsStatus(isGPSEnable: Boolean) {
                 this@PlacesActivity.isGPSEnabled = isGPSEnable
             }
         })
+    }
 
-        placesViewModel.mPlacesData!!.observe(this, {
+    fun registerObservers() {
+        placesViewModel.allPlacesSuccessLiveData.observe(this, {
 
 
         })
-
-
     }
 
     private fun startLocationUpdate() {

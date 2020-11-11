@@ -1,20 +1,18 @@
 package ir.behnoudsh.aroundme.data.repository
 
 import androidx.lifecycle.MutableLiveData
-import ir.behnoudsh.aroundme.data.api.ApiHelper
+import ir.behnoudsh.aroundme.data.api.ApiClient
 import ir.behnoudsh.aroundme.data.model.Venues.ResponseVenues
 
-class PlacesRepository(private val apiHelper: ApiHelper) {
+class PlacesRepository {
+    private val apiHandler = ApiClient.apiinterface
 
-    var allPlaces: ResponseVenues? = null
+    val allPlacesSuccessLiveData = MutableLiveData<ResponseVenues>()
 
-    suspend fun getPlaces(lat_lng: String, offset: Int): MutableLiveData<ResponseVenues>? {
+    suspend fun getPlaces(lat_lng: String, offset: Int) {
 
-        allPlaces = apiHelper.getvenues(lat_lng, offset);
-
-        val temp: MutableLiveData<ResponseVenues> = MutableLiveData()
-        temp.value = allPlaces
-        return temp
+        val response = apiHandler.getVenues(lat_lng, offset)
+        allPlacesSuccessLiveData.postValue(response?.body())
 
     }
 

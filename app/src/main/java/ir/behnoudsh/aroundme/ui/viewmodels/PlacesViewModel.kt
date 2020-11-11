@@ -5,11 +5,11 @@ import android.location.Location
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import ir.behnoudsh.aroundme.data.api.ApiHelper
-import ir.behnoudsh.aroundme.data.api.ApiService
+import androidx.lifecycle.viewModelScope
 import ir.behnoudsh.aroundme.data.model.LocationLiveData
 import ir.behnoudsh.aroundme.data.model.Venues.ResponseVenues
 import ir.behnoudsh.aroundme.data.repository.PlacesRepository
+import kotlinx.coroutines.launch
 
 class PlacesViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -19,6 +19,9 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     var firstLocationSet: Boolean = false
     lateinit var currentLocation: LocationLiveData
     var offset: Int = 0
+
+    val placesRepository: PlacesRepository = PlacesRepository()
+    val allPlacesSuccessLiveData = placesRepository.allPlacesSuccessLiveData
 
 
     fun getLocationData(): LocationLiveData {
@@ -42,19 +45,22 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
 
         }
 
-        getPlacesData(firstLocation, offset)
+        getAllPlaces(firstLocation, offset)
 
         return locationData;
     }
 
-    fun getPlacesData(location: LocationLiveData, offset: Int): LiveData<ResponseVenues>? {
+    fun getAllPlaces(location: LocationLiveData, offset: Int) {
 
         //get data based on firstlocation
-
-
-
-
-        return mPlacesData;
+        viewModelScope.launch {
+            placesRepository.getPlaces(
+                location.value?.latitude.toString()
+                        + "," +
+                        location.value?.longitude.toString(),
+                offset
+            )
+        }
 
     }
 
