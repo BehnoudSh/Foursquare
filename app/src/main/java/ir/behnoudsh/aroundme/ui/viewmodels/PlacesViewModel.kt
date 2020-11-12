@@ -21,8 +21,9 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     var offset: Int = 0
 
     val placesRepository: PlacesRepository = PlacesRepository()
+
     val allPlacesSuccessLiveData = placesRepository.allPlacesSuccessLiveData
-    val allPlacesFailureLiveData = placesRepository.allPlacesSuccessLiveData
+    val allPlacesFailureLiveData = placesRepository.allPlacesFailureLiveData
 
 
     fun getLocationData(): LocationLiveData {
@@ -31,23 +32,26 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun locationChanged(location: LocationModel) {
-        // too in method bayad barresi beshe ke
+        // too in method bayad barresi beshe kolle logic
 
-        var offset: Int = 20
 
-        getAllPlaces(LocationModel(51.4238302, 35.7233924), offset)
+        if (!firstLocationSet) {
+            var offset: Int = 20
 
+            getAllPlaces(LocationModel(51.4238302, 35.7233924), offset)
+            firstLocationSet = true
+        }
     }
 
 
     fun getAllPlaces(location: LocationModel, offset: Int) {
 
-        viewModelScope.launch {
-            placesRepository.getPlaces(
-                location.latitude.toString() + "," + location.longitude.toString(),
-                offset
-            )
-        }
+        /* viewModelScope.launch {*/
+        placesRepository.getPlaces(
+            location.latitude.toString() + "," + location.longitude.toString(),
+            offset
+        )
+//        }
 
     }
 
