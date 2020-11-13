@@ -7,14 +7,14 @@ import androidx.room.Insert
 import androidx.room.Query
 
 @Dao
-interface FoursqaurePlacesDao {
+interface FoursquarePlacesDao {
 
     @Query("SELECT * FROM places")
     fun getPlaces(): LiveData<List<FoursquarePlace>>
 
     @Insert
-    fun insertPlaces(places: List<FoursquarePlace>)
+    suspend fun insertPlaces(places: List<FoursquarePlace>)
 
     @Query("DELETE FROM places")
-    fun deletePlaces()
+    suspend fun deletePlaces()
 }

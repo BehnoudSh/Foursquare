@@ -4,15 +4,27 @@ import androidx.lifecycle.MutableLiveData
 import ir.behnoudsh.aroundme.data.api.ApiClient
 import ir.behnoudsh.aroundme.data.room.FoursquarePlace
 import ir.behnoudsh.aroundme.data.model.Venues.ResponseVenues
+import ir.behnoudsh.aroundme.data.room.FoursquarePlacesDao
 import retrofit2.Call
 import retrofit2.Response
 import java.lang.Exception
 
-class PlacesRepository {
+class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao) {
     private val apiHandler = ApiClient.apiinterface
 
     val allPlacesSuccessLiveData = MutableLiveData<List<FoursquarePlace>>()
     val allPlacesFailureLiveData = MutableLiveData<Boolean>()
+
+
+       fun getPlacesFromDB() = foursquareplacesDao.getPlaces()
+
+
+    suspend  fun addPlacesToDB(places: List<FoursquarePlace>) =
+        foursquareplacesDao.insertPlaces(places)
+
+
+    suspend  fun deletePlacesFromDB() = foursquareplacesDao.deletePlaces()
+
 
     /*suspend*/ fun getPlaces(lat_lng: String, offset: Int) {
         try {
