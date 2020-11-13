@@ -10,7 +10,7 @@ import androidx.room.Query
 interface FoursquarePlacesDao {
 
     @Query("SELECT * FROM places")
-    fun getPlaces(): LiveData<List<FoursquarePlace>>
+    suspend  fun getPlaces(): List<FoursquarePlace>
 
     @Insert
     suspend fun insertPlaces(places: List<FoursquarePlace>)

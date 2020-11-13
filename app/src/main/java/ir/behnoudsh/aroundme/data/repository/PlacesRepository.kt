@@ -1,12 +1,15 @@
 package ir.behnoudsh.aroundme.data.repository
 
 import android.app.Application
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import ir.behnoudsh.aroundme.data.api.ApiClient
 import ir.behnoudsh.aroundme.data.room.FoursquarePlace
 import ir.behnoudsh.aroundme.data.model.Venues.ResponseVenues
 import ir.behnoudsh.aroundme.data.pref.Prefs
 import ir.behnoudsh.aroundme.data.room.FoursquarePlacesDao
+import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Response
 import java.lang.Exception
@@ -14,20 +17,26 @@ import java.lang.Exception
 class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application: Application) {
     private val apiHandler = ApiClient.apiinterface
 
-    val allPlacesSuccessLiveData = MutableLiveData<ArrayList<FoursquarePlace>>()
+    val allPlacesSuccessLiveData = MediatorLiveData<ArrayList<FoursquarePlace>>()
     val allPlacesFailureLiveData = MutableLiveData<Boolean>()
-
     val prefs: Prefs = Prefs(application)
 
+    suspend fun getPlacesFromDB(): List<FoursquarePlace> = runBlocking(Dispatchers.Default) {
+        val result = async { foursquareplacesDao.getPlaces() }.await()
+        return@runBlocking result as List<FoursquarePlace>
+    }
 
-    fun getPlacesFromDB() = foursquareplacesDao.getPlaces()
+    suspend fun addPlacesToDB(places: List<FoursquarePlace>) {
+        withContext(Dispatchers.IO) {
+            foursquareplacesDao.insertPlaces(places)
+        }
+    }
 
+    suspend fun deletePlacesFromDB() {
 
-    suspend fun addPlacesToDB(places: List<FoursquarePlace>) =
-        foursquareplacesDao.insertPlaces(places)
+        withContext(Dispatchers.IO) { foursquareplacesDao.deletePlaces() }
 
-
-    suspend fun deletePlacesFromDB() = foursquareplacesDao.deletePlaces()
+    }
 
 
     /*suspend*/ fun getPlaces(lat_lng: String, offset: Int) {
@@ -65,9 +74,14 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
                                 placesList.add(item)
 
                             }
+
+                            GlobalScope.launch(Dispatchers.IO) {
+                                addPlacesToDB(placesList as ArrayList<FoursquarePlace>)
+                            }
                             prefs.previousOffset += 20
                             allPlacesSuccessLiveData.postValue(placesList as ArrayList<FoursquarePlace>?)
                             allPlacesFailureLiveData.postValue(false)
+
 
                         } else {
                             allPlacesFailureLiveData.postValue(true)

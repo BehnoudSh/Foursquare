@@ -2,10 +2,7 @@ package ir.behnoudsh.aroundme.ui.viewmodels
 
 import android.app.Application
 import android.location.Location
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import ir.behnoudsh.aroundme.App
 import ir.behnoudsh.aroundme.data.model.LocationLiveData
 import ir.behnoudsh.aroundme.data.model.LocationModel
@@ -15,6 +12,7 @@ import ir.behnoudsh.aroundme.data.repository.PlacesRepository
 import ir.behnoudsh.aroundme.data.room.AppDataBase
 import ir.behnoudsh.aroundme.data.room.FoursquarePlace
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class PlacesViewModel(application: Application) : AndroidViewModel(application) {
@@ -28,6 +26,7 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
 
     val foursquareplacesDao = AppDataBase.getDatabase(application).foursquareplacesDao()
     val placesRepository: PlacesRepository = PlacesRepository(foursquareplacesDao, application)
+
     val allPlacesSuccessLiveData = placesRepository.allPlacesSuccessLiveData
     val allPlacesFailureLiveData = placesRepository.allPlacesFailureLiveData
 
@@ -40,6 +39,12 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
 
 
     fun loadMore() {
+//
+//        var list: List<FoursquarePlace> = ArrayList()
+//        GlobalScope.launch(Dispatchers.IO) {
+//            list = getPlacesFromDB()
+//        }
+
         getAllPlaces(
             LocationModel(prefs.myLocationLong.toDouble(), prefs.myLocationLat.toDouble()),
             prefs.previousOffset
@@ -54,7 +59,7 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
             prefs.myLocationLong = location.longitude.toString()
             firstLocationSet = true
             prefs.previousOffset = 0
-
+            deletePlacesFromDB()
             getAllPlaces(
                 LocationModel(prefs.myLocationLong.toDouble(), prefs.myLocationLat.toDouble()),
                 prefs.previousOffset
@@ -68,6 +73,7 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
                 prefs.myLocationLong.toDouble()
             ) > 100
         ) {
+            deletePlacesFromDB()
 
             prefs.previousOffset = 0;
             prefs.myLocationLat = location.latitude.toString()
@@ -79,12 +85,11 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
             )
         }
 
-
-//        51.4238302, 35.7233924
     }
 
 
     fun getAllPlaces(location: LocationModel, offset: Int) {
+
         loadingLiveData?.postValue(true)
 
         /* viewModelScope.launch {*/
@@ -96,15 +101,9 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
 
     }
 
-    fun getPlacesFromDB(): LiveData<List<FoursquarePlace>>? {
+    suspend fun getPlacesFromDB(): List<FoursquarePlace> {
 
         return placesRepository.getPlacesFromDB()
-
-    }
-
-
-    fun addPlacesToDB(places: List<FoursquarePlace>) = viewModelScope.launch(Dispatchers.IO) {
-        placesRepository.addPlacesToDB(places)
     }
 
     fun deletePlacesFromDB() = viewModelScope.launch(Dispatchers.IO) {
@@ -121,5 +120,6 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
         loc2.longitude = lon2
         return loc1.distanceTo(loc2)
     }
+
 
 }
