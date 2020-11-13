@@ -79,6 +79,10 @@ class PlacesActivity : AppCompatActivity() {
     }
 
     fun registerObservers() {
+        placesViewModel.newLocationLiveData.observe(this, {
+            placesAdapter.placesList.clear()
+            placesAdapter.notifyDataSetChanged()
+        })
 
         placesViewModel.allPlacesSuccessLiveData.observe(this, {
             for (item in it)
@@ -97,7 +101,6 @@ class PlacesActivity : AppCompatActivity() {
         placesViewModel.loadingLiveData?.observe(this, {
             pb_loading.visibility = VISIBLE
         })
-
     }
 
     private fun startLocationUpdate() {

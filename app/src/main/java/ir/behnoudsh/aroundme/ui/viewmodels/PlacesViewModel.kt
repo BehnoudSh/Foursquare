@@ -29,6 +29,7 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
 
     val allPlacesSuccessLiveData = placesRepository.allPlacesSuccessLiveData
     val allPlacesFailureLiveData = placesRepository.allPlacesFailureLiveData
+    var newLocationLiveData: MutableLiveData<Boolean> = MutableLiveData()
 
     val prefs: Prefs = Prefs(application)
 
@@ -60,6 +61,8 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
             firstLocationSet = true
             prefs.previousOffset = 0
             deletePlacesFromDB()
+            newLocationLiveData.postValue(true)
+
             getAllPlaces(
                 LocationModel(prefs.myLocationLong.toDouble(), prefs.myLocationLat.toDouble()),
                 prefs.previousOffset
@@ -74,6 +77,7 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
             ) > 100
         ) {
             deletePlacesFromDB()
+            newLocationLiveData.postValue(true)
 
             prefs.previousOffset = 0;
             prefs.myLocationLat = location.latitude.toString()
