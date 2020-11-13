@@ -5,13 +5,19 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.opengl.Visibility
 import android.os.Bundle
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import ir.behnoudsh.aroundme.R
 import ir.behnoudsh.aroundme.data.model.LocationModel
+import ir.behnoudsh.aroundme.ui.adapter.PlacesAdapter
 import ir.behnoudsh.aroundme.utilities.GpsUtils
 import ir.behnoudsh.aroundme.ui.viewmodels.PlacesViewModel
 import kotlinx.android.synthetic.main.activity_places.*
@@ -19,6 +25,7 @@ import kotlinx.android.synthetic.main.activity_places.*
 class PlacesActivity : AppCompatActivity() {
     private lateinit var placesViewModel: PlacesViewModel
     private var isGPSEnabled = false
+    val placesAdapter = PlacesAdapter(this, ArrayList())
 
     override fun onStart() {
         super.onStart()
@@ -35,18 +42,54 @@ class PlacesActivity : AppCompatActivity() {
                 this@PlacesActivity.isGPSEnabled = isGPSEnable
             }
         })
+        initRecyclerView()
+    }
+
+    fun initRecyclerView() {
+        rv_placesList.layoutManager = LinearLayoutManager(this)
+        rv_placesList.adapter = placesAdapter
+        initScrollListener()
+    }
+
+    var isLoading = false
+
+    private fun initScrollListener() {
+        rv_placesList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager?
+                if (!isLoading) {
+                    if (linearLayoutManager != null &&
+                        linearLayoutManager.findLastCompletelyVisibleItemPosition() == rv_placesList.adapter!!.itemCount - 1
+                    ) {
+                        placesViewModel.loadMore()
+                        isLoading = true
+                    }
+                }
+            }
+        })
     }
 
     fun registerObservers() {
+
         placesViewModel.allPlacesSuccessLiveData.observe(this, {
-
-
+            for (item in it)
+                placesAdapter.placesList.add(item)
+            placesAdapter.notifyDataSetChanged()
         })
 
         placesViewModel.allPlacesFailureLiveData.observe(this, {
-
-
+            pb_loading.visibility = GONE
+            if (it)
+                btn_loadmore.visibility = VISIBLE
+            else
+                btn_loadmore.visibility = GONE
         })
+
+        placesViewModel.loadingLiveData?.observe(this, {
+            pb_loading.visibility = VISIBLE
+        })
+
     }
 
     private fun startLocationUpdate() {
@@ -120,6 +163,7 @@ class PlacesActivity : AppCompatActivity() {
         }
     }
 }
+
 
 const val LOCATION_REQUEST = 100
 const val GPS_REQUEST = 101

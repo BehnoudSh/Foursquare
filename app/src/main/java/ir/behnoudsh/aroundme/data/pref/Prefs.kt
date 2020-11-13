@@ -8,7 +8,8 @@ class Prefs(context: Context) {
 
     companion object {
         private const val PREFS_FILENAME = "aroundme_prefs"
-        private const val KEY_MY_LOCATION = "myLocation"
+        private const val KEY_MY_LOCATION_LAT = "myLocationLat"
+        private const val KEY_MY_LOCATION_LONG = "myLocationLong"
         private const val KEY_OFFSET = "previousOffset"
 
     }
@@ -16,9 +17,14 @@ class Prefs(context: Context) {
     private val sharedPrefs: SharedPreferences =
         context.getSharedPreferences(PREFS_FILENAME, Context.MODE_PRIVATE)
 
-    var myLocation: String
-        get() = sharedPrefs.getString(KEY_MY_LOCATION, "") ?: ""
-        set(value) = sharedPrefs.edit { putString(KEY_MY_LOCATION, value) }
+    var myLocationLat: String
+        get() = sharedPrefs.getString(KEY_MY_LOCATION_LAT, "") ?: ""
+        set(value) = sharedPrefs.edit { putString(KEY_MY_LOCATION_LAT, value) }
+
+    var myLocationLong: String
+        get() = sharedPrefs.getString(KEY_MY_LOCATION_LONG, "") ?: ""
+        set(value) = sharedPrefs.edit { putString(KEY_MY_LOCATION_LONG, value) }
+
 
     var previousOffset: Int
         get() = sharedPrefs.getInt(KEY_OFFSET, 0) ?: 0

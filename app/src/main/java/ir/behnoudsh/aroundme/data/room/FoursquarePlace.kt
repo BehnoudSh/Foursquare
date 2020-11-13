@@ -9,15 +9,17 @@ import androidx.room.PrimaryKey
 public data class FoursquarePlace(
     @PrimaryKey
     @ColumnInfo(name = "Id")
-    val id: String,
+    var id: String,
     @ColumnInfo(name = "Name")
-    val name: String,
+    var name: String,
     @ColumnInfo(name = "Address")
-    val address: String,
+    var address: String,
     @ColumnInfo(name = "Distance")
-    val distance: Int,
+    var distance: Int,
     @ColumnInfo(name = "Lat")
-    val lat: String,
+    var lat: String,
     @ColumnInfo(name = "Long")
-    val long: String
-)
+    var long: String
+) {
+    constructor() : this("", "", "", 0, "", "")
+}

@@ -24,35 +24,67 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     lateinit var firstLocation: LocationLiveData
     var firstLocationSet: Boolean = false
     lateinit var currentLocation: LocationLiveData
-    var offset: Int = 0
-
+    var loadingLiveData: MutableLiveData<Boolean> = MutableLiveData()
 
     val foursquareplacesDao = AppDataBase.getDatabase(application).foursquareplacesDao()
-    val placesRepository: PlacesRepository = PlacesRepository(foursquareplacesDao)
+    val placesRepository: PlacesRepository = PlacesRepository(foursquareplacesDao, application)
     val allPlacesSuccessLiveData = placesRepository.allPlacesSuccessLiveData
     val allPlacesFailureLiveData = placesRepository.allPlacesFailureLiveData
-    val prefs: Prefs by lazy {
-        Prefs(App.instance)
-    }
+
+    val prefs: Prefs = Prefs(application)
+
 
     fun getLocationData(): LocationLiveData {
-
         return locationData;
     }
 
+
+    fun loadMore() {
+        getAllPlaces(
+            LocationModel(prefs.myLocationLong.toDouble(), prefs.myLocationLat.toDouble()),
+            prefs.previousOffset
+        )
+
+    }
+
     fun locationChanged(location: LocationModel) {
-        // too in method bayad barresi beshe kolle logic
-
         if (!firstLocationSet) {
-            var offset: Int = 20
-
-            getAllPlaces(LocationModel(51.4238302, 35.7233924), offset)
+            prefs.myLocationLat = location.latitude.toString()
+            prefs.myLocationLong = location.longitude.toString()
             firstLocationSet = true
+            prefs.previousOffset = 0
+
+            getAllPlaces(
+                LocationModel(prefs.myLocationLong.toDouble(), prefs.myLocationLat.toDouble()),
+                prefs.previousOffset
+            )
         }
+
+        if (distance(
+                location.latitude,
+                location.longitude,
+                prefs.myLocationLat.toDouble(),
+                prefs.myLocationLong.toDouble()
+            ) > 100
+        ) {
+
+            prefs.previousOffset = 20;
+            prefs.myLocationLat = location.latitude.toString()
+            prefs.myLocationLong = location.longitude.toString()
+
+            getAllPlaces(
+                LocationModel(prefs.myLocationLong.toDouble(), prefs.myLocationLat.toDouble()),
+                prefs.previousOffset
+            )
+        }
+
+
+//        51.4238302, 35.7233924
     }
 
 
     fun getAllPlaces(location: LocationModel, offset: Int) {
+        loadingLiveData?.postValue(true)
 
         /* viewModelScope.launch {*/
         placesRepository.getPlaces(

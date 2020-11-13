@@ -1,29 +1,33 @@
 package ir.behnoudsh.aroundme.data.repository
 
+import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import ir.behnoudsh.aroundme.data.api.ApiClient
 import ir.behnoudsh.aroundme.data.room.FoursquarePlace
 import ir.behnoudsh.aroundme.data.model.Venues.ResponseVenues
+import ir.behnoudsh.aroundme.data.pref.Prefs
 import ir.behnoudsh.aroundme.data.room.FoursquarePlacesDao
 import retrofit2.Call
 import retrofit2.Response
 import java.lang.Exception
 
-class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao) {
+class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application: Application) {
     private val apiHandler = ApiClient.apiinterface
 
-    val allPlacesSuccessLiveData = MutableLiveData<List<FoursquarePlace>>()
+    val allPlacesSuccessLiveData = MutableLiveData<ArrayList<FoursquarePlace>>()
     val allPlacesFailureLiveData = MutableLiveData<Boolean>()
 
+    val prefs: Prefs = Prefs(application)
 
-       fun getPlacesFromDB() = foursquareplacesDao.getPlaces()
+
+    fun getPlacesFromDB() = foursquareplacesDao.getPlaces()
 
 
-    suspend  fun addPlacesToDB(places: List<FoursquarePlace>) =
+    suspend fun addPlacesToDB(places: List<FoursquarePlace>) =
         foursquareplacesDao.insertPlaces(places)
 
 
-    suspend  fun deletePlacesFromDB() = foursquareplacesDao.deletePlaces()
+    suspend fun deletePlacesFromDB() = foursquareplacesDao.deletePlaces()
 
 
     /*suspend*/ fun getPlaces(lat_lng: String, offset: Int) {
@@ -37,7 +41,7 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao) {
                         response: Response<ResponseVenues>
                     ) {
                         if (response.body() != null) {
-                            var placesList: MutableList<FoursquarePlace> =
+                            var placesList: MutableCollection<FoursquarePlace> =
                                 mutableListOf<FoursquarePlace>()
 
                             response.body()?.response?.groups?.get(0)?.items?.forEach() {
@@ -61,8 +65,8 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao) {
                                 placesList.add(item)
 
                             }
-
-                            allPlacesSuccessLiveData.postValue(placesList)
+                            prefs.previousOffset += 20
+                            allPlacesSuccessLiveData.postValue(placesList as ArrayList<FoursquarePlace>?)
                             allPlacesFailureLiveData.postValue(false)
 
                         } else {
