@@ -3,9 +3,9 @@ package ir.behnoudsh.aroundme.ui.views
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.opengl.Visibility
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -15,17 +15,21 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import io.github.inflationx.viewpump.ViewPumpContextWrapper
 import ir.behnoudsh.aroundme.R
 import ir.behnoudsh.aroundme.data.model.LocationModel
 import ir.behnoudsh.aroundme.ui.adapter.PlacesAdapter
-import ir.behnoudsh.aroundme.utilities.GpsUtils
 import ir.behnoudsh.aroundme.ui.viewmodels.PlacesViewModel
+import ir.behnoudsh.aroundme.utilities.GpsUtils
 import kotlinx.android.synthetic.main.activity_places.*
 
 class PlacesActivity : AppCompatActivity() {
     private lateinit var placesViewModel: PlacesViewModel
     private var isGPSEnabled = false
     val placesAdapter = PlacesAdapter(this, ArrayList())
+    override fun attachBaseContext(newBase: Context?) {
+        super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase!!))
+    }
 
     override fun onStart() {
         super.onStart()
@@ -43,6 +47,10 @@ class PlacesActivity : AppCompatActivity() {
             }
         })
         initRecyclerView()
+
+        btn_loadmore.setOnClickListener() {
+            placesViewModel.loadMore()
+        }
     }
 
     fun initRecyclerView() {

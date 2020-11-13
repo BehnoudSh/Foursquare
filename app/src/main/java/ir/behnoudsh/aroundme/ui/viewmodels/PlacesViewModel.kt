@@ -48,6 +48,7 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun locationChanged(location: LocationModel) {
+
         if (!firstLocationSet) {
             prefs.myLocationLat = location.latitude.toString()
             prefs.myLocationLong = location.longitude.toString()
@@ -68,7 +69,7 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
             ) > 100
         ) {
 
-            prefs.previousOffset = 20;
+            prefs.previousOffset = 0;
             prefs.myLocationLat = location.latitude.toString()
             prefs.myLocationLong = location.longitude.toString()
 
