@@ -19,6 +19,8 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
 
     val allPlacesSuccessLiveData = MediatorLiveData<ArrayList<FoursquarePlace>>()
     val allPlacesFailureLiveData = MutableLiveData<Boolean>()
+    val noLocationFoundLiveData2 = MutableLiveData<Boolean>()
+
     val prefs: Prefs = Prefs(application)
 
     suspend fun getPlacesFromDB(): List<FoursquarePlace> = runBlocking(Dispatchers.Default) {
@@ -84,6 +86,11 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
                             allPlacesFailureLiveData.postValue(false)
 
 
+                            if (offset == 0 && placesList.size == 0) {
+                                noLocationFoundLiveData2.postValue(true)
+                            }
+
+
                         } else {
                             allPlacesFailureLiveData.postValue(true)
                         }
@@ -132,6 +139,9 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
             allPlacesFailureLiveData.postValue(true)
         }
     }
+
+
+    suspend fun getPlaceDetails() {}
 
 
 }

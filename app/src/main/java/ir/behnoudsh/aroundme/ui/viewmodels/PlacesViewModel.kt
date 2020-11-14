@@ -7,9 +7,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.text.TextUtils
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.*
-import ir.behnoudsh.aroundme.App
 import ir.behnoudsh.aroundme.data.model.LocationLiveData
 import ir.behnoudsh.aroundme.data.model.LocationModel
 import ir.behnoudsh.aroundme.data.model.Venues.ResponseVenues
@@ -24,22 +22,17 @@ import kotlinx.coroutines.launch
 class PlacesViewModel(application: Application) : AndroidViewModel(application) {
 
     private val locationData = LocationLiveData(application)
-    var mPlacesData: MutableLiveData<ResponseVenues>? = null
-    lateinit var firstLocation: LocationLiveData
-    var firstLocationSet: Boolean = false
-    lateinit var currentLocation: LocationLiveData
     var loadingLiveData: MutableLiveData<Boolean> = MutableLiveData()
-
     val foursquareplacesDao = AppDataBase.getDatabase(application).foursquareplacesDao()
     val placesRepository: PlacesRepository = PlacesRepository(foursquareplacesDao, application)
-
     val allPlacesSuccessLiveData = placesRepository.allPlacesSuccessLiveData
     val allPlacesFailureLiveData = placesRepository.allPlacesFailureLiveData
     var newLocationLiveData: MutableLiveData<Boolean> = MutableLiveData()
+    var noLocationFoundLiveData: MutableLiveData<Boolean> = MutableLiveData()
+    var noLocationFoundLiveData2 = placesRepository.noLocationFoundLiveData2
     var message: MutableLiveData<String> = MutableLiveData()
-
     val prefs: Prefs = Prefs(application)
-
+    var dataReadFromDB: Boolean = false
 
     fun getLocationData(): LocationLiveData {
         return locationData;
@@ -74,8 +67,9 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
         )
 
         var datetimeDiff: Long = 0
-        if (!prefs.lastUpdated.equals(0))
+        if (prefs.lastUpdated != 0L)
             datetimeDiff = System.currentTimeMillis() - prefs.lastUpdated
+
 
         if (distanceFromOldPlace > 100
         ) {
@@ -91,7 +85,15 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
                 )
             } else {
                 GlobalScope.launch(Dispatchers.IO) {
-                    allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
+                    if (!dataReadFromDB) {
+                        if (getPlacesFromDB().size == 0) {
+                            noLocationFoundLiveData.postValue(true)
+                            message.postValue("مکانی یافت نشد")
+                        } else
+                            allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
+
+                        dataReadFromDB = true
+                    }
                 }
                 if (datetimeDiff < 86400000)
                     message.postValue("اینترنت ندارید و از مکان قبلی " + distanceFromOldPlace + " متر جابجا شده‌اید. هم‌چنین آخرین اطلاعات دریافتی مربوط به امروز است.")
@@ -102,7 +104,22 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
             if (isOnline(getApplication())) {
                 if (datetimeDiff < 86400000) {
                     GlobalScope.launch(Dispatchers.IO) {
-                        allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
+                        if (!dataReadFromDB) {
+                            if (getPlacesFromDB().size == 0) {
+                                noLocationFoundLiveData.postValue(true)
+                                message.postValue("مکانی یافت نشد")
+                            } else
+                                allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
+
+                            getAllPlaces(
+                                LocationModel(
+                                    prefs.myLocationLong.toDouble(),
+                                    prefs.myLocationLat.toDouble()
+                                ),
+                                prefs.previousOffset
+                            )
+                            dataReadFromDB = true
+                        }
                     }
                 } else {
                     deletePlacesFromDB()
@@ -118,12 +135,23 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
                 }
             } else {
                 GlobalScope.launch(Dispatchers.IO) {
-                    allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
+                    if (!dataReadFromDB) {
+
+                        if (getPlacesFromDB().size == 0) {
+                            noLocationFoundLiveData.postValue(true)
+                            message.postValue("مکانی یافت نشد")
+                        } else
+                            allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
+
+
+
+                        dataReadFromDB = true
+                    }
                 }
                 if (datetimeDiff < 86400000)
-                    message.postValue("آخرین اطلاعات دریافتی مربوط به امروز است.")
+                    message.postValue("اینترنت ندارید و آخرین اطلاعات دریافتی مربوط به امروز است.")
                 else
-                    message.postValue("آخرین اطلاعات دریافتی مربوط به روزهای پیشین است.")
+                    message.postValue("اینترنت ندارید و آخرین اطلاعات دریافتی مربوط به روزهای پیشین است.")
             }
         }
 

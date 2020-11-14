@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
@@ -18,15 +19,16 @@ import androidx.recyclerview.widget.RecyclerView
 import io.github.inflationx.viewpump.ViewPumpContextWrapper
 import ir.behnoudsh.aroundme.R
 import ir.behnoudsh.aroundme.data.model.LocationModel
+import ir.behnoudsh.aroundme.ui.adapter.CellClickListener
 import ir.behnoudsh.aroundme.ui.adapter.PlacesAdapter
 import ir.behnoudsh.aroundme.ui.viewmodels.PlacesViewModel
 import ir.behnoudsh.aroundme.utilities.GpsUtils
 import kotlinx.android.synthetic.main.activity_places.*
 
-class PlacesActivity : AppCompatActivity() {
+class PlacesActivity : AppCompatActivity(), CellClickListener {
     private lateinit var placesViewModel: PlacesViewModel
     private var isGPSEnabled = false
-    val placesAdapter = PlacesAdapter(this, ArrayList())
+    val placesAdapter = PlacesAdapter(this, ArrayList(),this)
     override fun attachBaseContext(newBase: Context?) {
         super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase!!))
     }
@@ -47,7 +49,6 @@ class PlacesActivity : AppCompatActivity() {
             }
         })
         initRecyclerView()
-
         btn_loadmore.setOnClickListener() {
             placesViewModel.loadMore()
         }
@@ -84,6 +85,12 @@ class PlacesActivity : AppCompatActivity() {
             placesAdapter.notifyDataSetChanged()
         })
 
+        placesViewModel.noLocationFoundLiveData2.observe(this,
+            { message.text = "اطلاعاتی یافت نشد" })
+
+        placesViewModel.noLocationFoundLiveData.observe(this,
+            { message.text = "اطلاعاتی یافت نشد" })
+
         placesViewModel.allPlacesSuccessLiveData.observe(this, {
             for (item in it)
                 placesAdapter.placesList.add(item)
@@ -101,13 +108,13 @@ class PlacesActivity : AppCompatActivity() {
         placesViewModel.loadingLiveData?.observe(this, {
             pb_loading.visibility = VISIBLE
         })
+
+        placesViewModel.message.observe(this, { message.text = it })
     }
 
     private fun startLocationUpdate() {
         placesViewModel.getLocationData().observe(this, Observer {
-//            latlong.text = getString(R.string.latLong, it.longitude, it.latitude)
             placesViewModel.locationChanged(LocationModel(it.longitude, it.latitude));
-
         })
     }
 
@@ -123,11 +130,11 @@ class PlacesActivity : AppCompatActivity() {
 
     private fun invokeLocationAction() {
         when {
-            !isGPSEnabled -> latlong.text = getString(R.string.enable_gps)
+            !isGPSEnabled -> message.text = getString(R.string.enable_gps)
 
             isPermissionsGranted() -> startLocationUpdate()
 
-            shouldShowRequestPermissionRationale() -> latlong.text =
+            shouldShowRequestPermissionRationale() -> message.text =
                 getString(R.string.permission_request)
 
             else -> ActivityCompat.requestPermissions(
@@ -172,6 +179,10 @@ class PlacesActivity : AppCompatActivity() {
                 invokeLocationAction()
             }
         }
+    }
+
+    override fun onCellClickListener() {
+        Toast.makeText(this, "Cell clicked", Toast.LENGTH_SHORT).show()
     }
 }
 

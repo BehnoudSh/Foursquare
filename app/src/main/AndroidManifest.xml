@@ -16,8 +16,8 @@
         android:theme="@style/Theme.AroundMe">
         <activity
             android:name=".ui.views.PlacesActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            android:screenOrientation="portrait">
+            <!--            android:theme="@style/Theme.AppCompat.Light.NoActionBar"-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
