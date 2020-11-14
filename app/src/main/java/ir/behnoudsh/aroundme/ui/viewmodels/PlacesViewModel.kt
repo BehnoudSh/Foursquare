@@ -1,7 +1,13 @@
 package ir.behnoudsh.aroundme.ui.viewmodels
 
 import android.app.Application
+import android.content.Context
 import android.location.Location
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.text.TextUtils
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.*
 import ir.behnoudsh.aroundme.App
 import ir.behnoudsh.aroundme.data.model.LocationLiveData
@@ -30,6 +36,7 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     val allPlacesSuccessLiveData = placesRepository.allPlacesSuccessLiveData
     val allPlacesFailureLiveData = placesRepository.allPlacesFailureLiveData
     var newLocationLiveData: MutableLiveData<Boolean> = MutableLiveData()
+    var message: MutableLiveData<String> = MutableLiveData()
 
     val prefs: Prefs = Prefs(application)
 
@@ -37,7 +44,6 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     fun getLocationData(): LocationLiveData {
         return locationData;
     }
-
 
     fun loadMore() {
 //
@@ -55,38 +61,70 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
 
     fun locationChanged(location: LocationModel) {
 
-        if (!firstLocationSet) {
+        if (TextUtils.isEmpty(prefs.myLocationLat) || TextUtils.isEmpty(prefs.myLocationLong)) {
             prefs.myLocationLat = location.latitude.toString()
             prefs.myLocationLong = location.longitude.toString()
-            firstLocationSet = true
-            prefs.previousOffset = 0
-            deletePlacesFromDB()
-            newLocationLiveData.postValue(true)
-
-            getAllPlaces(
-                LocationModel(prefs.myLocationLong.toDouble(), prefs.myLocationLat.toDouble()),
-                prefs.previousOffset
-            )
         }
 
-        if (distance(
-                location.latitude,
-                location.longitude,
-                prefs.myLocationLat.toDouble(),
-                prefs.myLocationLong.toDouble()
-            ) > 100
-        ) {
-            deletePlacesFromDB()
-            newLocationLiveData.postValue(true)
+        var distanceFromOldPlace = distance(
+            location.latitude,
+            location.longitude,
+            prefs.myLocationLat.toDouble(),
+            prefs.myLocationLong.toDouble()
+        )
 
+        var datetimeDiff: Long = 0
+        if (!prefs.lastUpdated.equals(0))
+            datetimeDiff = System.currentTimeMillis() - prefs.lastUpdated
+
+        if (distanceFromOldPlace > 100
+        ) {
             prefs.previousOffset = 0;
             prefs.myLocationLat = location.latitude.toString()
             prefs.myLocationLong = location.longitude.toString()
-
-            getAllPlaces(
-                LocationModel(prefs.myLocationLong.toDouble(), prefs.myLocationLat.toDouble()),
-                prefs.previousOffset
-            )
+            if (isOnline(getApplication())) {
+                deletePlacesFromDB()
+                newLocationLiveData.postValue(true)
+                getAllPlaces(
+                    LocationModel(prefs.myLocationLong.toDouble(), prefs.myLocationLat.toDouble()),
+                    prefs.previousOffset
+                )
+            } else {
+                GlobalScope.launch(Dispatchers.IO) {
+                    allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
+                }
+                if (datetimeDiff < 86400000)
+                    message.postValue("اینترنت ندارید و از مکان قبلی " + distanceFromOldPlace + " متر جابجا شده‌اید. هم‌چنین آخرین اطلاعات دریافتی مربوط به امروز است.")
+                else
+                    message.postValue("اینترنت ندارید و از مکان قبلی " + distanceFromOldPlace + " متر جابجا شده‌اید. هم‌چنین آخرین اطلاعات دریافتی مربوط به روزهای پیشین است.")
+            }
+        } else {
+            if (isOnline(getApplication())) {
+                if (datetimeDiff < 86400000) {
+                    GlobalScope.launch(Dispatchers.IO) {
+                        allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
+                    }
+                } else {
+                    deletePlacesFromDB()
+                    prefs.previousOffset = 0;
+                    newLocationLiveData.postValue(true)
+                    getAllPlaces(
+                        LocationModel(
+                            prefs.myLocationLong.toDouble(),
+                            prefs.myLocationLat.toDouble()
+                        ),
+                        prefs.previousOffset
+                    )
+                }
+            } else {
+                GlobalScope.launch(Dispatchers.IO) {
+                    allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
+                }
+                if (datetimeDiff < 86400000)
+                    message.postValue("آخرین اطلاعات دریافتی مربوط به امروز است.")
+                else
+                    message.postValue("آخرین اطلاعات دریافتی مربوط به روزهای پیشین است.")
+            }
         }
 
     }
@@ -123,6 +161,28 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
         loc2.latitude = lat2
         loc2.longitude = lon2
         return loc1.distanceTo(loc2)
+    }
+
+    fun isOnline(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (connectivityManager != null) {
+            val capabilities =
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            if (capabilities != null) {
+                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                    return true
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                    return true
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                    return true
+                }
+            }
+        }
+        return false
     }
 
 

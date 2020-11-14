@@ -78,6 +78,7 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
                             GlobalScope.launch(Dispatchers.IO) {
                                 addPlacesToDB(placesList as ArrayList<FoursquarePlace>)
                             }
+                            prefs.lastUpdated = System.currentTimeMillis()
                             prefs.previousOffset += 20
                             allPlacesSuccessLiveData.postValue(placesList as ArrayList<FoursquarePlace>?)
                             allPlacesFailureLiveData.postValue(false)

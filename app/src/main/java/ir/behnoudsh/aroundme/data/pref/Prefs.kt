@@ -11,7 +11,7 @@ class Prefs(context: Context) {
         private const val KEY_MY_LOCATION_LAT = "myLocationLat"
         private const val KEY_MY_LOCATION_LONG = "myLocationLong"
         private const val KEY_OFFSET = "previousOffset"
-
+        private const val KEY_LAST_UPDATED = "lastUpdated"
     }
 
     private val sharedPrefs: SharedPreferences =
@@ -30,5 +30,8 @@ class Prefs(context: Context) {
         get() = sharedPrefs.getInt(KEY_OFFSET, 0) ?: 0
         set(value) = sharedPrefs.edit { putInt(KEY_OFFSET, value) }
 
+    var lastUpdated: Long
+        get() = sharedPrefs.getLong(KEY_LAST_UPDATED, 0) ?: 0
+        set(value) = sharedPrefs.edit { putLong(KEY_LAST_UPDATED, value) }
 
 }
