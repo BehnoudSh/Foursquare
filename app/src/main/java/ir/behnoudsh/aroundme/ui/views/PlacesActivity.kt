@@ -32,7 +32,6 @@ class PlacesActivity : AppCompatActivity(), CellClickListener {
     val placesAdapter = PlacesAdapter(this, ArrayList(), this)
     var isLoading = false
 
-
     override fun attachBaseContext(newBase: Context?) {
         super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase!!))
     }
@@ -58,14 +57,11 @@ class PlacesActivity : AppCompatActivity(), CellClickListener {
         }
     }
 
-
     fun initRecyclerView() {
         rv_placesList.layoutManager = LinearLayoutManager(this)
         rv_placesList.adapter = placesAdapter
         initScrollListener()
     }
-
-
 
     private fun initScrollListener() {
         rv_placesList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -89,19 +85,13 @@ class PlacesActivity : AppCompatActivity(), CellClickListener {
             placesAdapter.placesList.clear()
             placesAdapter.notifyDataSetChanged()
         })
-
-        placesViewModel.noLocationFoundLiveData2.observe(this,
-            { message.text = "اطلاعاتی یافت نشد" })
-
-        placesViewModel.noLocationFoundLiveData.observe(this,
-            { message.text = "اطلاعاتی یافت نشد" })
-
         placesViewModel.allPlacesSuccessLiveData.observe(this, {
             for (item in it)
                 placesAdapter.placesList.add(item)
-            placesAdapter.notifyDataSetChanged()
-        })
 
+            placesAdapter.notifyDataSetChanged()
+
+        })
         placesViewModel.allPlacesFailureLiveData.observe(this, {
             pb_loading.visibility = GONE
             if (it)
@@ -109,24 +99,18 @@ class PlacesActivity : AppCompatActivity(), CellClickListener {
             else
                 btn_loadmore.visibility = GONE
         })
-
         placesViewModel.loadingLiveData?.observe(this, {
             pb_loading.visibility = VISIBLE
         })
-
         placesViewModel.message.observe(this, { message.text = it })
-
-
         placesViewModel.placeDetailsFailureLiveData.observe(this, {
 
             Toast.makeText(this, "بروز خطا در دریافت اطلاعات مکان", Toast.LENGTH_LONG).show()
         })
-
         placesViewModel.placeDetailsSuccessLiveData.observe(this, {
             val dialogFragment = PlaceDetailsDialog(it)
             dialogFragment.show(supportFragmentManager, "placeDetails")
         })
-
     }
 
     private fun startLocationUpdate() {

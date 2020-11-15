@@ -14,7 +14,7 @@ import ir.behnoudsh.aroundme.R
 import ir.behnoudsh.aroundme.data.room.FoursquarePlace
 import kotlinx.android.synthetic.main.dialog_place_details.*
 
-class PlaceDetailsDialog( var model: FoursquarePlace) :
+class PlaceDetailsDialog(var model: FoursquarePlace) :
     DialogFragment() {
 
 
@@ -59,7 +59,7 @@ class PlaceDetailsDialog( var model: FoursquarePlace) :
 
         val address = "آدرس: " + model.address
 
-        val distance = "فاصله از موقعیت فعلی شما " + model.distance
+        val distance = "فاصله از موقعیت فعلی شما " + model.distance + " متر"
 
         tv_details.text = name + "\n" + address + "\n" + distance
 

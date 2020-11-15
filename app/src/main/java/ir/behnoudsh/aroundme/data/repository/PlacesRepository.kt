@@ -13,12 +13,11 @@ import retrofit2.Call
 import retrofit2.Response
 
 class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application: Application) {
-    private val apiHandler = ApiClient.apiinterface
     val allPlacesSuccessLiveData = MutableLiveData<ArrayList<FoursquarePlace>>()
     val allPlacesFailureLiveData = MutableLiveData<Boolean>()
-    val noLocationFoundLiveData2 = MutableLiveData<Boolean>()
     val placeDetailsSuccessLiveData = MutableLiveData<FoursquarePlace>()
     val placeDetailsFailureLiveData = MutableLiveData<Boolean>()
+    val message = MutableLiveData<String>()
     val prefs: Prefs = Prefs(application)
 
     suspend fun getPlacesFromDB(): List<FoursquarePlace> = runBlocking(Dispatchers.Default) {
@@ -50,6 +49,7 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
                         placeDetailsFailureLiveData.postValue(true)
                     }
                 }
+
                 override fun onFailure(call: Call<ResponseVenue>, t: Throwable) {
                     placeDetailsFailureLiveData.postValue(true)
                 }
@@ -88,6 +88,7 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
                                 placesList.add(item)
                             }
 
+
                             GlobalScope.launch(Dispatchers.IO) {
                                 addPlacesToDB(placesList as ArrayList<FoursquarePlace>)
                             }
@@ -95,10 +96,7 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
                             prefs.previousOffset += 20
                             allPlacesSuccessLiveData.postValue(placesList as ArrayList<FoursquarePlace>?)
                             allPlacesFailureLiveData.postValue(false)
-
-                            if (offset == 0 && placesList.size == 0) {
-                                noLocationFoundLiveData2.postValue(true)
-                            }
+                            message.postValue("مکان‌های اطراف به‌روزرسانی شدند")
 
                         } else {
                             allPlacesFailureLiveData.postValue(true)

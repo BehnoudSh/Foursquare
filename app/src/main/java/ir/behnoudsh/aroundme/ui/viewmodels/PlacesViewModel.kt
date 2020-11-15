@@ -1,16 +1,12 @@
 package ir.behnoudsh.aroundme.ui.viewmodels
 
 import android.app.Application
-import android.content.Context
-import android.location.Location
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.text.TextUtils
-import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import ir.behnoudsh.aroundme.data.model.LocationLiveData
 import ir.behnoudsh.aroundme.data.model.LocationModel
-import ir.behnoudsh.aroundme.data.model.Venues.ResponseVenues
 import ir.behnoudsh.aroundme.data.pref.Prefs
 import ir.behnoudsh.aroundme.data.repository.PlacesRepository
 import ir.behnoudsh.aroundme.data.room.AppDataBase
@@ -30,9 +26,8 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     val allPlacesSuccessLiveData = placesRepository.allPlacesSuccessLiveData
     val allPlacesFailureLiveData = placesRepository.allPlacesFailureLiveData
     var newLocationLiveData: MutableLiveData<Boolean> = MutableLiveData()
-    var noLocationFoundLiveData: MutableLiveData<Boolean> = MutableLiveData()
-    var noLocationFoundLiveData2 = placesRepository.noLocationFoundLiveData2
-    var message: MutableLiveData<String> = MutableLiveData()
+
+    var message = placesRepository.message
     val prefs: Prefs = Prefs(application)
     var dataReadFromDB: Boolean = false
     val internetUtils: InternetUtils = InternetUtils(application)
@@ -76,7 +71,6 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
         if (prefs.lastUpdated != 0L)
             datetimeDiff = System.currentTimeMillis() - prefs.lastUpdated
 
-
         if (distanceFromOldPlace > 100
         ) {
             prefs.previousOffset = 0;
@@ -93,11 +87,11 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
                 GlobalScope.launch(Dispatchers.IO) {
                     if (!dataReadFromDB) {
                         if (getPlacesFromDB().size == 0) {
-                            noLocationFoundLiveData.postValue(true)
-                            message.postValue("مکانی یافت نشد")
-                        } else
+                            message.postValue("مکانی در دیتابیس یافت نشد")
+                        } else {
                             allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
-
+                            message.postValue("")
+                        }
                         dataReadFromDB = true
                     }
                 }
@@ -112,11 +106,14 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
                     GlobalScope.launch(Dispatchers.IO) {
                         if (!dataReadFromDB) {
                             if (getPlacesFromDB().size == 0) {
-                                noLocationFoundLiveData.postValue(true)
-                                message.postValue("مکانی یافت نشد")
-                            } else
+                                message.postValue("مکانی در دیتابیس یافت نشد")
+                            } else {
                                 allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
+                                message.postValue("")
+                            }
 
+                            prefs.previousOffset = 0
+                            deletePlacesFromDB()
                             getAllPlaces(
                                 LocationModel(
                                     prefs.myLocationLong.toDouble(),
@@ -144,11 +141,11 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
                     if (!dataReadFromDB) {
 
                         if (getPlacesFromDB().size == 0) {
-                            noLocationFoundLiveData.postValue(true)
-                            message.postValue("مکانی یافت نشد")
-                        } else
+                            message.postValue("مکانی در دیتابیس یافت نشد")
+                        } else {
                             allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
-
+                            message.postValue("")
+                        }
                         dataReadFromDB = true
                     }
                 }
