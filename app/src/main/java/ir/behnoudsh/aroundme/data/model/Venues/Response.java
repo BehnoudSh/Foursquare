@@ -8,9 +8,6 @@ import java.util.List;
 
 public class Response {
 
-    @SerializedName("warning")
-    @Expose
-    private Warning warning;
     @SerializedName("headerLocation")
     @Expose
     private String headerLocation;
@@ -23,20 +20,11 @@ public class Response {
     @SerializedName("totalResults")
     @Expose
     private Integer totalResults;
-    @SerializedName("suggestedBounds")
-    @Expose
-    private SuggestedBounds suggestedBounds;
+
     @SerializedName("groups")
     @Expose
     private List<Group> groups = null;
 
-    public Warning getWarning() {
-        return warning;
-    }
-
-    public void setWarning(Warning warning) {
-        this.warning = warning;
-    }
 
     public String getHeaderLocation() {
         return headerLocation;
@@ -68,14 +56,6 @@ public class Response {
 
     public void setTotalResults(Integer totalResults) {
         this.totalResults = totalResults;
-    }
-
-    public SuggestedBounds getSuggestedBounds() {
-        return suggestedBounds;
-    }
-
-    public void setSuggestedBounds(SuggestedBounds suggestedBounds) {
-        this.suggestedBounds = suggestedBounds;
     }
 
     public List<Group> getGroups() {

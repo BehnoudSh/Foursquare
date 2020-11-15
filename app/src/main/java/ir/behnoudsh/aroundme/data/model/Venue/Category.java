@@ -18,9 +18,6 @@ public class Category {
     @SerializedName("shortName")
     @Expose
     private String shortName;
-    @SerializedName("icon")
-    @Expose
-    private Icon icon;
     @SerializedName("primary")
     @Expose
     private Boolean primary;
@@ -57,13 +54,6 @@ public class Category {
         this.shortName = shortName;
     }
 
-    public Icon getIcon() {
-        return icon;
-    }
-
-    public void setIcon(Icon icon) {
-        this.icon = icon;
-    }
 
     public Boolean getPrimary() {
         return primary;

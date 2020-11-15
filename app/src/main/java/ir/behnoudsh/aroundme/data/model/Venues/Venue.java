@@ -20,9 +20,7 @@ public class Venue {
     @SerializedName("categories")
     @Expose
     private List<Category> categories = null;
-    @SerializedName("photos")
-    @Expose
-    private Photos photos;
+
 
     public String getId() {
         return id;
@@ -56,12 +54,5 @@ public class Venue {
         this.categories = categories;
     }
 
-    public Photos getPhotos() {
-        return photos;
-    }
-
-    public void setPhotos(Photos photos) {
-        this.photos = photos;
-    }
 
 }
