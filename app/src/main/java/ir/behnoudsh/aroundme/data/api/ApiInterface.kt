@@ -22,7 +22,7 @@ interface ApiInterface {
     @GET(
         "{venue_id}?client_id= WGCTBTV215LV5ONUYVU0X00LBPEHJJTUJYBVAQ2J0HPUWQ52&client_secret=MAXZTYFGJFTY5WH4COY5ZCIUOQWEXWWLUDYYHVHQSAP4UZTC&v=20190218"
     )
-    suspend fun getVenueDetails(
+    /*suspend*/ fun getVenueDetails(
         @Path(
             value = "venue_id",
             encoded = true

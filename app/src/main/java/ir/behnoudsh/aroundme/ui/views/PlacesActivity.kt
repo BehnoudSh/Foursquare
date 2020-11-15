@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import io.github.inflationx.viewpump.ViewPumpContextWrapper
 import ir.behnoudsh.aroundme.R
 import ir.behnoudsh.aroundme.data.model.LocationModel
+import ir.behnoudsh.aroundme.data.room.FoursquarePlace
 import ir.behnoudsh.aroundme.ui.adapter.CellClickListener
 import ir.behnoudsh.aroundme.ui.adapter.PlacesAdapter
 import ir.behnoudsh.aroundme.ui.viewmodels.PlacesViewModel
@@ -28,7 +29,7 @@ import kotlinx.android.synthetic.main.activity_places.*
 class PlacesActivity : AppCompatActivity(), CellClickListener {
     private lateinit var placesViewModel: PlacesViewModel
     private var isGPSEnabled = false
-    val placesAdapter = PlacesAdapter(this, ArrayList(),this)
+    val placesAdapter = PlacesAdapter(this, ArrayList(), this)
     override fun attachBaseContext(newBase: Context?) {
         super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase!!))
     }
@@ -53,6 +54,7 @@ class PlacesActivity : AppCompatActivity(), CellClickListener {
             placesViewModel.loadMore()
         }
     }
+
 
     fun initRecyclerView() {
         rv_placesList.layoutManager = LinearLayoutManager(this)
@@ -110,6 +112,18 @@ class PlacesActivity : AppCompatActivity(), CellClickListener {
         })
 
         placesViewModel.message.observe(this, { message.text = it })
+
+
+        placesViewModel.placeDetailsFailureLiveData.observe(this, {
+
+            Toast.makeText(this, "بروز خطا در دریافت اطلاعات مکان", Toast.LENGTH_LONG).show()
+        })
+
+        placesViewModel.placeDetailsSuccessLiveData.observe(this, {
+            val dialogFragment = PlaceDetailsDialog(it)
+            dialogFragment.show(supportFragmentManager, "placeDetails")
+        })
+
     }
 
     private fun startLocationUpdate() {
@@ -181,8 +195,10 @@ class PlacesActivity : AppCompatActivity(), CellClickListener {
         }
     }
 
-    override fun onCellClickListener() {
-        Toast.makeText(this, "Cell clicked", Toast.LENGTH_SHORT).show()
+    override fun onCellClickListener(place: FoursquarePlace) {
+
+        placesViewModel.getPlaceDetails(place)
+
     }
 }
 

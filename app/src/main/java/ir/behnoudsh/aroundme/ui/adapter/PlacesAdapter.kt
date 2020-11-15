@@ -32,7 +32,7 @@ class PlacesAdapter(
         holder.tv_placeName.setText(placesList.get(position).name)
         holder.tv_placeDistance.setText("در " + placesList.get(position).distance + " متری شما")
         holder.itemView.setOnClickListener {
-            cellClickListener.onCellClickListener()
+            cellClickListener.onCellClickListener(placesList.get(position))
         }
     }
 
@@ -46,7 +46,7 @@ class PlacesViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 }
 
 interface CellClickListener {
-    fun onCellClickListener()
+    fun onCellClickListener(place: FoursquarePlace)
 }
 
 

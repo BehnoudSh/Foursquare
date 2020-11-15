@@ -19,7 +19,9 @@ public data class FoursquarePlace(
     @ColumnInfo(name = "Lat")
     var lat: String,
     @ColumnInfo(name = "Long")
-    var long: String
+    var long: String,
+    @ColumnInfo(name = "Link")
+    var link: String
 ) {
-    constructor() : this("", "", "", 0, "", "")
+    constructor() : this("", "", "", 0, "", "", "")
 }

@@ -34,6 +34,9 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     val prefs: Prefs = Prefs(application)
     var dataReadFromDB: Boolean = false
 
+    val placeDetailsSuccessLiveData = placesRepository.placeDetailsSuccessLiveData
+    val placeDetailsFailureLiveData = placesRepository.placeDetailsFailureLiveData
+
     fun getLocationData(): LocationLiveData {
         return locationData;
     }
@@ -143,8 +146,6 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
                         } else
                             allPlacesSuccessLiveData.postValue(getPlacesFromDB() as ArrayList<FoursquarePlace>?)
 
-
-
                         dataReadFromDB = true
                     }
                 }
@@ -154,9 +155,7 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
                     message.postValue("اینترنت ندارید و آخرین اطلاعات دریافتی مربوط به روزهای پیشین است.")
             }
         }
-
     }
-
 
     fun getAllPlaces(location: LocationModel, offset: Int) {
 
@@ -169,6 +168,12 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
         )
 //        }
 
+    }
+
+    fun getPlaceDetails(place: FoursquarePlace) {
+//        viewModelScope.launch {
+        placesRepository.getPlaceDetails(place)
+//        }
     }
 
     suspend fun getPlacesFromDB(): List<FoursquarePlace> {

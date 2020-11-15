@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import ir.behnoudsh.aroundme.data.api.ApiClient
+import ir.behnoudsh.aroundme.data.model.Venue.ResponseVenue
 import ir.behnoudsh.aroundme.data.room.FoursquarePlace
 import ir.behnoudsh.aroundme.data.model.Venues.ResponseVenues
 import ir.behnoudsh.aroundme.data.pref.Prefs
@@ -17,9 +18,13 @@ import java.lang.Exception
 class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application: Application) {
     private val apiHandler = ApiClient.apiinterface
 
-    val allPlacesSuccessLiveData = MediatorLiveData<ArrayList<FoursquarePlace>>()
+    val allPlacesSuccessLiveData = MutableLiveData<ArrayList<FoursquarePlace>>()
     val allPlacesFailureLiveData = MutableLiveData<Boolean>()
     val noLocationFoundLiveData2 = MutableLiveData<Boolean>()
+
+
+    val placeDetailsSuccessLiveData = MutableLiveData<FoursquarePlace>()
+    val placeDetailsFailureLiveData = MutableLiveData<Boolean>()
 
     val prefs: Prefs = Prefs(application)
 
@@ -40,6 +45,30 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
 
     }
 
+    /*suspend*/ fun getPlaceDetails(place: FoursquarePlace) {
+
+        ApiClient.apiinterface.getVenueDetails(place.id)
+            ?.enqueue(object : retrofit2.Callback<ResponseVenue> {
+                override fun onResponse(
+                    call: Call<ResponseVenue>,
+                    response: Response<ResponseVenue>
+                ) {
+
+                    if (response.body() != null) {
+                        place.link = response.body()!!.response.venue.canonicalUrl
+                        placeDetailsSuccessLiveData.postValue(place)
+                    } else {
+                        placeDetailsFailureLiveData.postValue(true)
+                    }
+
+                }
+
+                override fun onFailure(call: Call<ResponseVenue>, t: Throwable) {
+                    placeDetailsFailureLiveData.postValue(true)
+
+                }
+            })
+    }
 
     /*suspend*/ fun getPlaces(lat_lng: String, offset: Int) {
         try {
@@ -71,6 +100,7 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
                                     it.venue.location.distance,
                                     it.venue.location.lat.toString(),
                                     it.venue.location.lng.toString(),
+                                    ""
                                 )
 
                                 placesList.add(item)
@@ -78,7 +108,7 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
                             }
 
                             GlobalScope.launch(Dispatchers.IO) {
-                                addPlacesToDB(placesList as ArrayList<FoursquarePlace>)
+                                //   addPlacesToDB(placesList as ArrayList<FoursquarePlace>)
                             }
                             prefs.lastUpdated = System.currentTimeMillis()
                             prefs.previousOffset += 20
@@ -97,7 +127,7 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
                     }
 
                     override fun onFailure(call: Call<ResponseVenues>, t: Throwable) {
-                        allPlacesFailureLiveData.postValue(false)
+                        allPlacesFailureLiveData.postValue(true)
                     }
                 })
 
@@ -139,9 +169,6 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
             allPlacesFailureLiveData.postValue(true)
         }
     }
-
-
-    suspend fun getPlaceDetails() {}
 
 
 }

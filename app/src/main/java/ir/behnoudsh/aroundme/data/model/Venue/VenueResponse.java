@@ -4,7 +4,7 @@ package ir.behnoudsh.aroundme.data.model.Venue;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Response {
+public class VenueResponse {
 
     @SerializedName("venue")
     @Expose
