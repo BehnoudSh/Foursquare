@@ -8,13 +8,13 @@ public class VenueResponse {
 
     @SerializedName("venue")
     @Expose
-    private Venue venue;
+    private VenueDetail venue;
 
-    public Venue getVenue() {
+    public VenueDetail getVenue() {
         return venue;
     }
 
-    public void setVenue(Venue venue) {
+    public void setVenue(VenueDetail venue) {
         this.venue = venue;
     }
 

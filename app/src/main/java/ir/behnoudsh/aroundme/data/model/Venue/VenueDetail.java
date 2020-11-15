@@ -1,4 +1,3 @@
-
 package ir.behnoudsh.aroundme.data.model.Venue;
 
 import com.google.gson.annotations.Expose;
@@ -6,7 +5,8 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class Venue {
+public class VenueDetail {
+
 
     @SerializedName("id")
     @Expose
@@ -32,7 +32,7 @@ public class Venue {
     @Expose
     private String timeZone;
 
-    public Venue(String id, String name, Location location, String canonicalUrl, List<Category> categories, String shortUrl, String timeZone) {
+    public VenueDetail(String id, String name, Location location, String canonicalUrl, List<Category> categories, String shortUrl, String timeZone) {
         this.id = id;
         this.name = name;
         this.location = location;

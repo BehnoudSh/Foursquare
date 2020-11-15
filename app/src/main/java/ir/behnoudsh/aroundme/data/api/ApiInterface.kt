@@ -16,7 +16,7 @@ interface ApiInterface {
     suspend fun getVenues(
         @Query("ll") lng_lat: String?,
         @Query("offset") offset: Int
-    ): Call<ResponseVenues>?
+    ): Response<ResponseVenues>?
 
 
     @GET(
@@ -27,7 +27,7 @@ interface ApiInterface {
             value = "venue_id",
             encoded = true
         ) venueId: String?
-    ): Call<ResponseVenue>?
+    ): Response<ResponseVenue>?
 
 
 }
