@@ -20,8 +20,8 @@ import io.github.inflationx.viewpump.ViewPumpContextWrapper
 import ir.behnoudsh.aroundme.R
 import ir.behnoudsh.aroundme.data.model.LocationModel
 import ir.behnoudsh.aroundme.data.room.FoursquarePlace
-import ir.behnoudsh.aroundme.ui.adapter.CellClickListener
-import ir.behnoudsh.aroundme.ui.adapter.PlacesAdapter
+import ir.behnoudsh.aroundme.ui.adapters.CellClickListener
+import ir.behnoudsh.aroundme.ui.adapters.PlacesAdapter
 import ir.behnoudsh.aroundme.ui.viewmodels.PlacesViewModel
 import ir.behnoudsh.aroundme.utilities.GpsUtils
 import kotlinx.android.synthetic.main.activity_places.*
@@ -30,6 +30,9 @@ class PlacesActivity : AppCompatActivity(), CellClickListener {
     private lateinit var placesViewModel: PlacesViewModel
     private var isGPSEnabled = false
     val placesAdapter = PlacesAdapter(this, ArrayList(), this)
+    var isLoading = false
+
+
     override fun attachBaseContext(newBase: Context?) {
         super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase!!))
     }
@@ -62,7 +65,7 @@ class PlacesActivity : AppCompatActivity(), CellClickListener {
         initScrollListener()
     }
 
-    var isLoading = false
+
 
     private fun initScrollListener() {
         rv_placesList.addOnScrollListener(object : RecyclerView.OnScrollListener() {

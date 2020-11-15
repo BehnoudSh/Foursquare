@@ -15,6 +15,8 @@ import ir.behnoudsh.aroundme.data.pref.Prefs
 import ir.behnoudsh.aroundme.data.repository.PlacesRepository
 import ir.behnoudsh.aroundme.data.room.AppDataBase
 import ir.behnoudsh.aroundme.data.room.FoursquarePlace
+import ir.behnoudsh.aroundme.utilities.DistanceUtils
+import ir.behnoudsh.aroundme.utilities.InternetUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -33,9 +35,10 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     var message: MutableLiveData<String> = MutableLiveData()
     val prefs: Prefs = Prefs(application)
     var dataReadFromDB: Boolean = false
-
+    val internetUtils: InternetUtils = InternetUtils(application)
     val placeDetailsSuccessLiveData = placesRepository.placeDetailsSuccessLiveData
     val placeDetailsFailureLiveData = placesRepository.placeDetailsFailureLiveData
+    val distanceUtils: DistanceUtils = DistanceUtils()
 
     fun getLocationData(): LocationLiveData {
         return locationData;
@@ -62,7 +65,7 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
             prefs.myLocationLong = location.longitude.toString()
         }
 
-        var distanceFromOldPlace = distance(
+        var distanceFromOldPlace = distanceUtils.distance(
             location.latitude,
             location.longitude,
             prefs.myLocationLat.toDouble(),
@@ -79,7 +82,7 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
             prefs.previousOffset = 0;
             prefs.myLocationLat = location.latitude.toString()
             prefs.myLocationLong = location.longitude.toString()
-            if (isOnline(getApplication())) {
+            if (internetUtils.isOnline(getApplication())) {
                 deletePlacesFromDB()
                 newLocationLiveData.postValue(true)
                 getAllPlaces(
@@ -104,7 +107,7 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
                     message.postValue("اینترنت ندارید و از مکان قبلی " + distanceFromOldPlace + " متر جابجا شده‌اید. هم‌چنین آخرین اطلاعات دریافتی مربوط به روزهای پیشین است.")
             }
         } else {
-            if (isOnline(getApplication())) {
+            if (internetUtils.isOnline(getApplication())) {
                 if (datetimeDiff < 86400000) {
                     GlobalScope.launch(Dispatchers.IO) {
                         if (!dataReadFromDB) {
@@ -184,39 +187,5 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     fun deletePlacesFromDB() = viewModelScope.launch(Dispatchers.IO) {
         placesRepository.deletePlacesFromDB()
     }
-
-
-    private fun distance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Float {
-        val loc1 = Location("")
-        loc1.latitude = lat1
-        loc1.longitude = lon1
-        val loc2 = Location("")
-        loc2.latitude = lat2
-        loc2.longitude = lon2
-        return loc1.distanceTo(loc2)
-    }
-
-    fun isOnline(context: Context): Boolean {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (connectivityManager != null) {
-            val capabilities =
-                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-            if (capabilities != null) {
-                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
-                    return true
-                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
-                    return true
-                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
 
 }

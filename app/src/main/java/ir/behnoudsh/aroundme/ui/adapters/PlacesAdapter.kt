@@ -1,4 +1,4 @@
-package ir.behnoudsh.aroundme.ui.adapter
+package ir.behnoudsh.aroundme.ui.adapters
 
 import android.app.Activity
 import android.view.View

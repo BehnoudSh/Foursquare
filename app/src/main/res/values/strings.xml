@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">AroundMe</string>
 
-    <string name="latLong">Longitude: %.3f, Latitude: %.3f</string>
-    <string name="enable_gps">Please enable your gps</string>
-    <string name="permission_request">App requires location permission</string>
+     <string name="enable_gps">لطفا GPS را روشن کنید</string>
+    <string name="permission_request">دسترسی موقعیت برای نمایش مکان‌ها لازم است</string>
 </resources>

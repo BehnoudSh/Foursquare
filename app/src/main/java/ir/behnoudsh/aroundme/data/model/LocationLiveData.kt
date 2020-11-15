@@ -14,14 +14,10 @@ class LocationLiveData(context: Context) : LiveData<LocationModel>() {
 
     private var fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
-//    var locationModel = MutableLiveData<LocationModel>()
-
     override fun onInactive() {
         super.onInactive()
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
-
-
 
     @SuppressLint("MissingPermission")
     override fun onActive() {
@@ -58,14 +54,12 @@ class LocationLiveData(context: Context) : LiveData<LocationModel>() {
             longitude = location.longitude,
             latitude = location.latitude
         )
-
-//        locationModel.postValue(LocationModel(location.longitude, location.latitude))
     }
 
     companion object {
         val locationRequest: LocationRequest = LocationRequest.create().apply {
-            interval = 10000
-            fastestInterval = 5000
+            interval = 30000
+            fastestInterval = 30000
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
     }
