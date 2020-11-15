@@ -40,11 +40,6 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun loadMore() {
-//
-//        var list: List<FoursquarePlace> = ArrayList()
-//        GlobalScope.launch(Dispatchers.IO) {
-//            list = getPlacesFromDB()
-//        }
 
         getAllPlaces(
             LocationModel(prefs.myLocationLong.toDouble(), prefs.myLocationLat.toDouble()),
