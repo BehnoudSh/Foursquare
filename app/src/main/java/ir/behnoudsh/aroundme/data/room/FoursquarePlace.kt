@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "places")
 
-public data class FoursquarePlace(
+data class FoursquarePlace(
     @PrimaryKey
     @ColumnInfo(name = "Id")
     var id: String,

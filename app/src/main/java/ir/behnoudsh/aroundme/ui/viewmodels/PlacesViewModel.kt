@@ -161,19 +161,19 @@ class PlacesViewModel(application: Application) : AndroidViewModel(application) 
 
         loadingLiveData?.postValue(true)
 
-        /* viewModelScope.launch {*/
-        placesRepository.getPlaces(
-            location.latitude.toString() + "," + location.longitude.toString(),
-            offset
-        )
-//        }
+        GlobalScope.launch(Dispatchers.IO) {
+            placesRepository.getPlaces(
+                location.latitude.toString() + "," + location.longitude.toString(),
+                offset
+            )
+        }
 
     }
 
     fun getPlaceDetails(place: FoursquarePlace) {
-//        viewModelScope.launch {
-        placesRepository.getPlaceDetails(place)
-//        }
+        GlobalScope.launch(Dispatchers.IO)  {
+            placesRepository.getPlaceDetails(place)
+        }
     }
 
     suspend fun getPlacesFromDB(): List<FoursquarePlace> {

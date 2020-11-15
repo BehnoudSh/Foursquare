@@ -35,7 +35,7 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
         withContext(Dispatchers.IO) { foursquareplacesDao.deletePlaces() }
     }
 
-    /*suspend*/ fun getPlaceDetails(place: FoursquarePlace) {
+    suspend fun getPlaceDetails(place: FoursquarePlace) {
         ApiClient.apiinterface.getVenueDetails(place.id)
             ?.enqueue(object : retrofit2.Callback<ResponseVenue> {
                 override fun onResponse(
@@ -56,7 +56,7 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
             })
     }
 
-    /*suspend*/ fun getPlaces(lat_lng: String, offset: Int) {
+    suspend fun getPlaces(lat_lng: String, offset: Int) {
         try {
 
             ApiClient.apiinterface.getVenues(lat_lng, offset)
@@ -88,7 +88,6 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
                                 placesList.add(item)
                             }
 
-
                             GlobalScope.launch(Dispatchers.IO) {
                                 addPlacesToDB(placesList as ArrayList<FoursquarePlace>)
                             }
@@ -112,6 +111,4 @@ class PlacesRepository(val foursquareplacesDao: FoursquarePlacesDao, application
             allPlacesFailureLiveData.postValue(true)
         }
     }
-
-
 }
