@@ -2,12 +2,19 @@
 The implementation of Foursquare api. When the user moves, the new data around the current location is being fetched, showed in View and saved in Room database. (offline first architecture!) if the location changes more than 100 meter, we assume a new location for the user.  
 
 Kotlin language
+
 MVVM architecture
+
 Livedata for reactive programming
+
 Kotlin coroutines for multithreading
+
 ROOM persistence library for caching the data
+
 Retrofit for network calls
+
 and other components such as androidX, butterknife, calligraphy and etc... .
+
 
 My approach is as below:
 
